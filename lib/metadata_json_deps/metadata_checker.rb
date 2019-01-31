@@ -5,8 +5,8 @@ class MetadataJsonDeps::MetadataChecker
   def initialize(metadata, forge, updated_module, updated_module_version)
     @metadata = metadata
     @forge = forge
-    @updated_module = updated_module.sub('-', '/')
-    @updated_module_version = updated_module_version
+    @updated_module = updated_module.sub('-', '/') if updated_module
+    @updated_module_version = updated_module_version if updated_module_version
   end
 
   # Perform constraint comparisons of dependencies based on their latest version, and also
