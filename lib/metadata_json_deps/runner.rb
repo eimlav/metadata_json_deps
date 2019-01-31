@@ -7,7 +7,7 @@ require 'parallel'
 
 # Main runner for MetadataJsonDeps
 class MetadataJsonDeps::Runner
-  def initialize(managed_modules_path, updated_module, updated_module_version, verbose, use_slack, logs_file)
+  def initialize(managed_modules_path, updated_module, updated_module_version, verbose, logs_file)
     @default_managed_modules_path = 'https://gist.githubusercontent.com/eimlav/6df50eda0b1c57c1ab8c33b64c82c336/raw/managed_modules.yaml'
     managed_modules_path ||= @default_managed_modules_path
     @module_names = return_modules(managed_modules_path)
@@ -16,8 +16,6 @@ class MetadataJsonDeps::Runner
     @updated_module_version = updated_module_version
     @verbose = verbose
     @forge = MetadataJsonDeps::ForgeHelper.new
-    @use_slack = use_slack
-    @slack_webhook = ENV['METADATA_JSON_DEPS_SLACK_WEBHOOK']
   end
 
   def run
@@ -142,11 +140,10 @@ class MetadataJsonDeps::Runner
     managed_modules_yaml
   end
 
-  # Post message to console, Slack and/or a logfile based on whether they have been enabled
+  # Post message to console and/or a logfile based on whether they have been enabled
   # @param message [String]
   def post(message)
     puts message
-    post_to_slack(message) if @use_slack
     post_to_logs(message) if @logs_file
   end
 
@@ -159,34 +156,11 @@ class MetadataJsonDeps::Runner
     logger.info message
   end
 
-  # Post a supplied message to Slack using a Slack webhook specified by @slack_webhook
-  # @param message [String]
-  def post_to_slack(message)
-    raise 'METADATA_JSON_DEPS_SLACK_WEBHOOK env var not specified' unless @slack_webhook
-
-    uri = URI.parse(@slack_webhook)
-    request = Net::HTTP::Post.new(uri)
-    request.content_type = 'application/json'
-    request.body = JSON.dump(
-      'text' => message,
-    )
-
-    req_options = {
-      use_ssl: uri.scheme == 'https'
-    }
-
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(request)
-    end
-
-    raise 'Encountered issue posting to Slack' unless response.code == '200'
-  end
-
   def get_metadata_from_file(filename)
     JSON.parse(File.read(filename))
   end
 
-  def self.run(managed_modules_path, module_name, new_version, verbose = 'false', use_slack = 'false', logs_file)
-    new(managed_modules_path, module_name, new_version, verbose == 'true', use_slack == 'true', logs_file).run
+  def self.run(managed_modules_path, module_name, new_version, verbose = 'false', logs_file)
+    new(managed_modules_path, module_name, new_version, verbose == 'true', logs_file).run
   end
 end

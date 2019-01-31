@@ -6,7 +6,6 @@ describe 'compare_dependencies' do
   module_name = 'puppetlabs-stdlib'
   version = '10.0.0'
   verbose = false
-  use_slack = false
   logs_file = File.join(File.expand_path(File.dirname(File.dirname(__FILE__))), 'fixtures/logs.log')
 
   after :each do
@@ -15,7 +14,7 @@ describe 'compare_dependencies' do
 
   context 'check compare_dependencies task with valid arguments' do
     it 'is expected to run without errors' do
-      expect { MetadataJsonDeps::Runner.run(managed_modules_file, module_name, version, verbose, use_slack, logs_file) }.not_to raise_error
+      expect { MetadataJsonDeps::Runner.run(managed_modules_file, module_name, version, verbose, logs_file) }.not_to raise_error
       expect(File.exist?(logs_file)).to be true
     end
   end
