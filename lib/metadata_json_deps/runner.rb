@@ -110,7 +110,7 @@ class MetadataJsonDeps::Runner
   # @return [Map] a map of dependencies along with their constraint, current version and whether they satisfy the constraint
   def get_dependencies(module_name)
     module_data = @forge.get_module_data(module_name)
-    metadata = module_data['current_release']['metadata']
+    metadata = module_data.current_release.metadata
     checker = MetadataJsonDeps::MetadataChecker.new(metadata, @forge, @updated_module, @updated_module_version)
     checker.check_dependencies
   end
